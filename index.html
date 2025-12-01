@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz Website</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+#box {
+  background: white;
+  padding: 20px;
+  width: 380px;
+  margin: auto;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px #aaa;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.option {
+  margin: 5px 0;
+  padding: 8px;
+  background: #eee;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#timer {
+  font-weight: bold;
+  color: red;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+<div id="box">
+<h2>Quiz Game</h2>
+
+<label>Enter your name:</label><br>
+<input type="text" id="name" /><br><br>
+
+<label>Select Mode:</label><br>
+<select id="mode">
+  <option value="easy">Easy</option>
+  <option value="medium">Medium</option>
+  <option value="hard">Hard</option>
+</select><br><br>
+
+<button onclick="startQuiz()">Start Quiz</button>
+
+<div id="quizArea"></div>
+</div>
+
+<script>
+// ---------------------- QUESTIONS -------------------------
+
+const deasy = {
+  "Who is known as the ‘Father of the Indian Constitution’ ?" :
+    ["Mahatma Gandhi","B.R. Ambedkar","Jawaharlal Nehru","Sardar Vallabhbhai Patel", 2],
+
+  "The largest planet in our Solar System is—" :
+    ["Earth","Jupiter","Saturn","Neptune", 2],
+
+  "The currency of Japan is—" :
+    ["Yen","Yuan","Won","Ringgit", 1],
+
+  "Which river is known as the ‘Sorrow of Bihar’ ?" :
+    ["Ganga","Yamuna","Kosi","Brahmaputra", 3],
+
+  "Who wrote the national anthem of India?" :
+    ["Bankim Chandra Chatterjee","Rabindranath Tagore","Subramania Bharati","Iqbal", 2],
+
+  "The first woman Prime Minister of India was—" :
+    ["Pratibha Patil","Sarojini Naidu","Indira Gandhi","Sonia Gandhi", 3],
+
+  "Which state is known as the ‘Spice Garden of India’ ?" :
+    ["Kerala","Tamil Nadu","Karnataka","Andhra Pradesh", 1],
+
+  "The headquarters of the United Nations is located in—" :
+    ["Geneva","Paris","New York","London", 3],
+
+  "Who discovered the law of gravitation?" :
+    ["Albert Einstein","Galileo Galilei","Isaac Newton","Charles Darwin", 3],
+
+  "The Indian Parliament consists of—" :
+    ["Lok Sabha only","Rajya Sabha only","Lok Sabha and Rajya Sabha","President, Lok Sabha, and Rajya Sabha", 4]
+};
+
+const dmed = {
+  "Who discovered penicillin" :
+    ["Louis Pasteur","Alexander Fleming","Marie Curie","Isaac Newton", 2],
+
+  "What is the chemical symbol for gold" :
+    ["Go","Gd","Au","Ag", 3],
+
+  "Which country is known as the 'Land of the Rising Sun'" :
+    ["China","South Korea","Japan","Vietnam", 3],
+
+  "What is the smallest continent in the world" :
+    ["Australia","Europe","Asia","South America", 1],
+
+  "In what year did the first man land on the moon" :
+    [1969,1971,1975,1965, 1],
+
+  "Which planet is known as the 'Red Planet'" :
+    ["Jupiter","Saturn","Mars","Venus", 3],
+
+  "Who wrote the play 'Hamlet'" :
+    ["Charles Dickens","William Shakespeare","Jane Austen","Leo Tolstoy", 2],
+
+  "What is the capital of Canada" :
+    ["Toronto","Vancouver","Montreal","Ottawa", 4],
+
+  "Which is the largest ocean on Earth" :
+    ["Atlantic Ocean","Indian Ocean","Arctic Ocean","Pacific Ocean", 4],
+
+  "What is the hardest natural substance on Earth" :
+    ["Granite","Diamond","Iron","Titanium", 2]
+};
+
+const dhard = {
+  "Which country was the first to grant women the right to vote?" :
+    ["United States","New Zealand","Finland","Canada", 2],
+
+  "The element with atomic number 92 is" :
+    ["Uranium","Plutonium","Thorium","Radium", 1],
+
+  "Who was the first Indian to win a Nobel Prize?" :
+    ["C.V. Raman","Rabindranath Tagore","Mother Teresa","Hargobind Khorana", 2],
+
+  "The Great Barrier Reef is located along the coast of which country?" :
+    ["South Africa","Australia","Indonesia","Philippines", 2],
+
+  "The ancient city of Machu Picchu is located in which country?" :
+    ["Mexico","Chile","Peru","Brazil", 3],
+
+  "Which planet has the shortest day?" :
+    ["Jupiter","Saturn","Neptune","Earth", 1],
+
+  "Who wrote the Indian national anthem?" :
+    ["Bankim Chandra Chatterjee","Rabindranath Tagore","Subramania Bharati","Sarojini Naidu", 2],
+
+  "The world's largest desert is" :
+    ["Sahara Desert","Arabian Desert","Gobi Desert","Antarctic Desert", 4],
+
+  "Who discovered the law of gravitation?" :
+    ["Albert Einstein","Isaac Newton","Galileo Galilei","Johannes Kepler", 2],
+
+  "The headquarters of the United Nations is located in" :
+    ["Geneva","Paris","New York","London", 3]
+};
+
+// ---------------------- QUIZ LOGIC + TIMER -------------------------
+
+let questions = {};
+let keys = [];
+let index = 0;
+let score = 0;
+let timer;
+let timeLeft = 30;
+
+function startQuiz() {
+  const mode = document.getElementById("mode").value;
+
+  if (mode === "easy") questions = deasy;
+  else if (mode === "medium") questions = dmed;
+  else questions = dhard;
+
+  keys = Object.keys(questions);
+  index = 0;
+  score = 0;
+
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (index >= keys.length) {
+    document.getElementById("quizArea").innerHTML =
+      `<h3>Quiz Over!</h3><p>Total Score: ${score}</p>`;
+    return;
+  }
+
+  let q = keys[index];
+  let opts = questions[q];
+
+  document.getElementById("quizArea").innerHTML = `
+    <div id="timer">Time Left: 30s</div>
+    <h3>${q}</h3>
+    <div class='option' onclick='checkAnswer(1)'>${opts[0]}</div>
+    <div class='option' onclick='checkAnswer(2)'>${opts[1]}</div>
+    <div class='option' onclick='checkAnswer(3)'>${opts[2]}</div>
+    <div class='option' onclick='checkAnswer(4)'>${opts[3]}</div>
+  `;
+
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = 30;
+  clearInterval(timer);
+
+  timer = setInterval(function() {
+    timeLeft--;
+    document.getElementById("timer").innerHTML = `Time Left: ${timeLeft}s`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      index++;
+      loadQuestion();
+    }
+  }, 1000);
+}
+
+function checkAnswer(ans) {
+  let correct = questions[keys[index]][4];
+  if (ans === correct) score++;
+
+  clearInterval(timer);
+  index++;
+  loadQuestion();
+}
+</script>
+</body>
+</html>
